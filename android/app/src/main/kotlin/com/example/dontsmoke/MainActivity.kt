@@ -1,4 +1,4 @@
-package com.example.dontsmoke
+package com.dontsmoke.kz
 
 import io.flutter.embedding.android.FlutterActivity
 

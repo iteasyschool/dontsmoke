@@ -51,6 +51,8 @@ struct DontSmokeEntry: TimelineEntry {
 
 struct DontSmokeProvider: TimelineProvider {
 
+    private static let suiteName = "group.com.dontsmoke.kz"
+
     func placeholder(in context: Context) -> DontSmokeEntry {
         DontSmokeEntry(date: Date(), slideIndex: 0, bgStyle: "dark",
                        quitDateMillis: -1, cigarettesPerDay: 0,

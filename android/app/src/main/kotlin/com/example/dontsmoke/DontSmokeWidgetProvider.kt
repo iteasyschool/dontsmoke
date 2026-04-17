@@ -1,4 +1,4 @@
-﻿package com.example.dontsmoke
+﻿package com.dontsmoke.kz
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -12,8 +12,8 @@ import android.widget.RemoteViews
 class DontSmokeWidgetProvider : AppWidgetProvider() {
 
     companion object {
-        const val ACTION_NEXT_SLIDE = "com.example.dontsmoke.NEXT_SLIDE"
-        const val ACTION_NEXT_BG = "com.example.dontsmoke.NEXT_BG"
+        const val ACTION_NEXT_SLIDE = "com.dontsmoke.kz.NEXT_SLIDE"
+        const val ACTION_NEXT_BG = "com.dontsmoke.kz.NEXT_BG"
 
         const val FLUTTER_PREFS = "FlutterSharedPreferences"
         const val KEY_QUIT_DATE_MILLIS = "flutter.quit_date_millis"

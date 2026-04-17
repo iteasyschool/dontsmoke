@@ -7,7 +7,7 @@ import '../models/user_profile.dart';
 /// Android: SharedPreferences ("FlutterSharedPreferences" with "flutter." prefix).
 /// iOS: App Group UserDefaults via MethodChannel + WidgetKit reload.
 class WidgetUpdateService {
-  static const _iosChannel = MethodChannel('com.example.dontsmoke/widget');
+  static const _iosChannel = MethodChannel('com.dontsmoke.kz/widget');
 
   static Future<void> saveProfileForWidget(UserProfile profile) async {
     try {

@@ -4,7 +4,11 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
+<<<<<<< HEAD
 		<string>group.com.dontsmoke.com</string>
+=======
+		<string>group.com.dontsmoke.kz</string>
+>>>>>>> 669c699421a26ce79164e8b247a3be3fb3a62238
 	</array>
 </dict>
 </plist>
