@@ -164,7 +164,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               const SizedBox(height: 20),
               // Стоимость пачки
               Text(
-                'Стоимость одной пачки (₽)',
+                'Стоимость одной пачки',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),

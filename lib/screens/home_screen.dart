@@ -245,7 +245,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _StatCard(
-                                  title: currencyFormat.format(moneySaved),
+                                  title: moneySaved.toString(),
+                                  iconWidget: Image.asset(
+                                    'assets/money_icon.png',
+                                    width: 32,
+                                    height: 32,
+                                  ),
                                   subtitle: 'Сэкономлено',
                                   icon: Icons.attach_money_outlined,
                                 ),
@@ -296,11 +301,13 @@ class _StatCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final Widget? iconWidget;
 
   const _StatCard({
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.iconWidget,
   });
 
   @override
@@ -316,7 +323,7 @@ class _StatCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 32, color: Colors.green),
+          iconWidget ?? Icon(icon, size: 32, color: Colors.green),
           const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
