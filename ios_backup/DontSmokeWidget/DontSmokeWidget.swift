@@ -51,6 +51,8 @@ struct DontSmokeEntry: TimelineEntry {
 
 struct DontSmokeProvider: TimelineProvider {
 
+    private static let suiteName = "group.com.dontsmoke.kz"
+
     func placeholder(in context: Context) -> DontSmokeEntry {
         DontSmokeEntry(date: Date(), slideIndex: 0, bgStyle: "dark",
                        quitDateMillis: -1, cigarettesPerDay: 0,
@@ -68,7 +70,7 @@ struct DontSmokeProvider: TimelineProvider {
     }
 
     private func readEntry(date: Date) -> DontSmokeEntry {
-        let defaults = UserDefaults(suiteName: suiteName)
+        let defaults = UserDefaults(suiteName: DontSmokeProvider.suiteName)
         let slideIndex = defaults?.integer(forKey: "widget_slide_index") ?? 0
         let bgStyle    = defaults?.string(forKey: "widget_bg_style") ?? "dark"
         let quitMillis = defaults?.object(forKey: "quit_date_millis") as? Int64 ?? -1

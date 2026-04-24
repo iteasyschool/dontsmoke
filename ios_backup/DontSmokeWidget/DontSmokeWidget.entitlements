@@ -2,13 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>aps-environment</key>
-	<string>development</string>
-	<key>com.apple.developer.background-tasks.continued-processing.gpu</key>
-	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
+<<<<<<< HEAD
 		<string>group.com.dontsmoke.com</string>
+=======
+		<string>group.com.dontsmoke.kz</string>
+>>>>>>> 669c699421a26ce79164e8b247a3be3fb3a62238
 	</array>
 </dict>
 </plist>
