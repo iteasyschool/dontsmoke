@@ -8,11 +8,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-<<<<<<< HEAD
-		<string>group.com.dontsmoke.com</string>
-=======
-		<string>group.com.dontsmoke.kz</string>
->>>>>>> eb178b37ce0b22d411118c7a248257babf54886e
+		<string>group.kz.dontsmoke.app</string>
 	</array>
 </dict>
 </plist>

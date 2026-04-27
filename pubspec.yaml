@@ -4,9 +4,8 @@ description: "A new Flutter project."
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-<<<<<<< HEAD
-version: 1.4.0+6
-=======
+version: 1.5.0+8
+
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
@@ -19,8 +18,6 @@ version: 1.4.0+6
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.5.0+7
->>>>>>> eb178b37ce0b22d411118c7a248257babf54886e
 
 environment:
   sdk: ^3.10.1

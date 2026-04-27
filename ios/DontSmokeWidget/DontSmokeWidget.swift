@@ -4,7 +4,7 @@ import AppIntents
 
 // MARK: - Constants
 
-private let suiteName = "group.com.dontsmoke.kz"
+private let suiteName = "group.kz.dontsmoke.app"
 
 // MARK: - App Intents (iOS 17+)
 
