@@ -187,12 +187,14 @@ struct DontSmokeWidgetView: View {
         guard entry.quitDateMillis > 0 else { return ("—", label) }
 
         let quitDate = Date(timeIntervalSince1970: Double(entry.quitDateMillis) / 1000.0)
-        let diffMs = Int64(Date().timeIntervalSince(quitDate) * 1000)
-        guard diffMs >= 0 else { return ("—", label) }
+        let diffSeconds = Date().timeIntervalSince(quitDate)
+        guard diffSeconds >= 0 else { return ("—", label) }
 
-        let minutes = diffMs / 60_000
-        let hours   = diffMs / 3_600_000
-        let days    = diffMs / 86_400_000
+        let minutes = Int64(diffSeconds / 60)
+        let hours   = Int64(diffSeconds / 3600)
+        let days    = Int64(diffSeconds / 86400)
+        
+        let fractionalDays = diffSeconds / 86400.0
 
         switch entry.slideIndex {
         case 0:
@@ -203,17 +205,21 @@ struct DontSmokeWidgetView: View {
             else                  { v = "\(days / 30)мес \(days % 30)д" }
             return (v, label)
         case 1:
-            let cpack = max(Int64(entry.cigarettesPerPack), 1)
-            let saved = days * Int64(entry.cigarettesPerDay) * Int64(entry.costPerPack) / cpack
-            return ("\(saved)₽", label)
+            let cpp = Double(entry.costPerPack)
+            let cpd = Double(entry.cigarettesPerDay)
+            let cpack = Double(max(entry.cigarettesPerPack, 1))
+            let saved = fractionalDays * cpd * cpp / cpack
+            return ("\(Int64(saved))₽", label)
         case 2:
-            return ("\(days * Int64(entry.cigarettesPerDay))", label)
+            let avoided = Int64(fractionalDays * Double(entry.cigarettesPerDay))
+            return ("\(avoided)", label)
         default:
-            let added = days * Int64(entry.cigarettesPerDay) * 11
+            // Health: 11 minutes per cigarette avoided
+            let addedMins = fractionalDays * Double(entry.cigarettesPerDay) * 11
             let v: String
-            if added < 60        { v = "\(added)м" }
-            else if added < 1440 { v = "\(added / 60)ч" }
-            else                 { v = "\(added / 1440)д" }
+            if addedMins < 60        { v = "\(Int64(addedMins))м" }
+            else if addedMins < 1440 { v = "\(Int64(addedMins / 60))ч" }
+            else                     { v = "\(Int64(addedMins / 1440))д" }
             return (v, label)
         }
     }
