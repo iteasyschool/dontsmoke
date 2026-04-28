@@ -25,6 +25,16 @@ String _formatDuration(DateTime quitDate) {
   }
 }
 
+String _formatHealth(double minutes) {
+  if (minutes < 60) {
+    return '${minutes.round()} м';
+  } else if (minutes < 1440) {
+    return '${(minutes / 60).floor()} ч';
+  } else {
+    return '${(minutes / 1440).floor()} д';
+  }
+}
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -146,11 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final timeLabel = _formatDuration(provider.profile!.quitDate);
         final moneySaved = provider.getMoneySaved();
-        final currencyFormat = NumberFormat.currency(
-          locale: 'ru_RU',
-          symbol: '₽',
-          decimalDigits: 0,
-        );
         final cigarettesAvoided = provider.getSmokedCigarettesAvoided();
         final healthImprovement = provider.getHealthImprovement();
 
@@ -275,8 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _StatCard(
-                                  title:
-                                      '${NumberFormat.decimalPattern('ru_RU').format(healthImprovement)} м',
+                                  title: _formatHealth(healthImprovement),
                                   subtitle: 'Жизнь продлена',
                                   icon: Icons.favorite,
                                 ),

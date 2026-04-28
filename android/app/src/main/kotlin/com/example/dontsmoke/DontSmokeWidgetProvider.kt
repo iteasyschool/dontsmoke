@@ -121,7 +121,7 @@ class DontSmokeWidgetProvider : AppWidgetProvider() {
                 }
                 1 -> {
                     val saved = if (cpack > 0) (totalHours * cpd.toDouble() * cpp.toDouble() / (cpack.toDouble() * 24.0)).toLong() else 0L
-                    Pair("${saved}🪙", label)
+                    Pair("$saved", label)
                 }
                 2 -> {
                     val avoided = (totalHours * cpd.toDouble() / 24.0).toLong()

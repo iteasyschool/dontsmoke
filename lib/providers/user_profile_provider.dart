@@ -55,5 +55,5 @@ class UserProfileProvider extends ChangeNotifier {
   int getMonthsSinceQuit() => _profile?.getMonthsSinceQuit() ?? 0;
   double getSmokedCigarettesAvoided() =>
       _profile?.getSmokedCigarettesAvoided() ?? 0;
-  int getHealthImprovement() => _profile?.getHealthImprovement() ?? 0;
+  double getHealthImprovement() => _profile?.getHealthImprovement() ?? 0;
 }

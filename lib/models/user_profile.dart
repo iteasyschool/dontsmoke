@@ -80,16 +80,16 @@ class UserProfile {
   double getSmokedCigarettesAvoided() {
     if (cigarettesPerDay == 0) return 0;
 
-    final minutesInDay = 1440; // 24 часа * 60 минут
-    final intervalBetweenCigarettes = minutesInDay / cigarettesPerDay;
-    final minutesSinceQuit = DateTime.now().difference(quitDate).inMinutes;
+    final secondsInDay = 86400; // 24 часа * 60 минут * 60 секунд
+    final intervalInSeconds = secondsInDay / cigarettesPerDay;
+    final secondsSinceQuit = DateTime.now().difference(quitDate).inSeconds;
 
-    return minutesSinceQuit / intervalBetweenCigarettes;
+    return secondsSinceQuit / intervalInSeconds;
   }
 
-  // Оценка улучшения здоровья в минутах (примерный расчёт)
-  int getHealthImprovement() {
-    final hoursSinceQuit = DateTime.now().difference(quitDate).inHours;
-    return hoursSinceQuit * 60; // 60 минут здоровья за час отсутствия курения
+  // Оценка улучшения здоровья в минутах (11 минут за каждую невыкуренную сигарету)
+  double getHealthImprovement() {
+    final cigarettesSaved = getSmokedCigarettesAvoided();
+    return cigarettesSaved * 11;
   }
 }

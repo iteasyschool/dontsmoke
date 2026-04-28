@@ -209,7 +209,7 @@ struct DontSmokeWidgetView: View {
             let cpd = Double(entry.cigarettesPerDay)
             let cpack = Double(max(entry.cigarettesPerPack, 1))
             let saved = fractionalDays * cpd * cpp / cpack
-            return ("\(Int64(saved))₽", label)
+            return ("\(Int64(saved))", label)
         case 2:
             let avoided = Int64(fractionalDays * Double(entry.cigarettesPerDay))
             return ("\(avoided)", label)
