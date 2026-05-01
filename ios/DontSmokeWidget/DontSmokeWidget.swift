@@ -5,8 +5,23 @@ import AppIntents
 // MARK: - Constants
 
 private let suiteName = "group.kz.dontsmoke.app"
+private let widgetKind = "DontSmokeWidget"
+private let timelineHorizonMinutes = 120
 
 // MARK: - App Intents (iOS 17+)
+
+@available(iOS 16.0, *)
+struct PreviousSlideIntent: AppIntent {
+    static var title: LocalizedStringResource = "Previous Slide"
+
+    func perform() async throws -> some IntentResult {
+        let defaults = UserDefaults(suiteName: suiteName)
+        let current = defaults?.integer(forKey: "widget_slide_index") ?? 0
+        defaults?.set((current + 3) % 4, forKey: "widget_slide_index")
+        WidgetCenter.shared.reloadTimelines(ofKind: widgetKind)
+        return .result()
+    }
+}
 
 @available(iOS 16.0, *)
 struct NextSlideIntent: AppIntent {
@@ -16,6 +31,7 @@ struct NextSlideIntent: AppIntent {
         let defaults = UserDefaults(suiteName: suiteName)
         let current = defaults?.integer(forKey: "widget_slide_index") ?? 0
         defaults?.set((current + 1) % 4, forKey: "widget_slide_index")
+        WidgetCenter.shared.reloadTimelines(ofKind: widgetKind)
         return .result()
     }
 }
@@ -31,6 +47,7 @@ struct CycleBgIntent: AppIntent {
         let current = defaults?.string(forKey: "widget_bg_style") ?? "dark"
         let idx = themes.firstIndex(of: current) ?? 0
         defaults?.set(themes[(idx + 1) % themes.count], forKey: "widget_bg_style")
+        WidgetCenter.shared.reloadTimelines(ofKind: widgetKind)
         return .result()
     }
 }
@@ -62,15 +79,18 @@ struct DontSmokeProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<DontSmokeEntry>) -> Void) {
-        let entry = readEntry(date: Date())
-        let refresh = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
-        completion(Timeline(entries: [entry], policy: .after(refresh)))
+        let now = Date()
+        let entry = readEntry(date: now)
+        let dates = timelineDates(from: now, quitDateMillis: entry.quitDateMillis)
+        let entries = dates.map { readEntry(date: $0) }
+        let refresh = dates.last?.addingTimeInterval(60) ?? now.addingTimeInterval(60 * 60)
+        completion(Timeline(entries: entries, policy: .after(refresh)))
     }
 
     private func readEntry(date: Date) -> DontSmokeEntry {
         let defaults = UserDefaults(suiteName: suiteName)
-        let slideIndex = defaults?.integer(forKey: "widget_slide_index") ?? 0
-        let bgStyle    = defaults?.string(forKey: "widget_bg_style") ?? "dark"
+        let slideIndex = currentSlideIndex()
+        let bgStyle    = currentBgStyle()
         let quitMillis = defaults?.object(forKey: "quit_date_millis") as? Int64 ?? -1
         let cpd        = defaults?.integer(forKey: "cigarettes_per_day") ?? 0
         let cpp        = defaults?.integer(forKey: "cost_per_pack") ?? 0
@@ -80,6 +100,37 @@ struct DontSmokeProvider: TimelineProvider {
                               quitDateMillis: quitMillis, cigarettesPerDay: cpd,
                               costPerPack: cpp, cigarettesPerPack: cpack)
     }
+
+    private func timelineDates(from start: Date, quitDateMillis: Int64) -> [Date] {
+        var dates = [start]
+
+        var firstMinuteRefresh = start.addingTimeInterval(60)
+        if quitDateMillis > 0 {
+            let quitDate = Date(timeIntervalSince1970: Double(quitDateMillis) / 1000.0)
+            let elapsed = start.timeIntervalSince(quitDate)
+            if elapsed >= 0 {
+                let remainder = elapsed.truncatingRemainder(dividingBy: 60)
+                let secondsToNextMinute = remainder == 0 ? 60 : 60 - remainder
+                firstMinuteRefresh = start.addingTimeInterval(secondsToNextMinute + 0.25)
+            }
+        }
+
+        for minute in 0..<timelineHorizonMinutes {
+            dates.append(firstMinuteRefresh.addingTimeInterval(Double(minute) * 60))
+        }
+
+        return dates
+    }
+}
+
+private func currentSlideIndex() -> Int {
+    let defaults = UserDefaults(suiteName: suiteName)
+    return min(max(defaults?.integer(forKey: "widget_slide_index") ?? 0, 0), 3)
+}
+
+private func currentBgStyle() -> String {
+    let defaults = UserDefaults(suiteName: suiteName)
+    return defaults?.string(forKey: "widget_bg_style") ?? "dark"
 }
 
 // MARK: - View
@@ -89,10 +140,12 @@ struct DontSmokeWidgetView: View {
 
     private static let icons  = ["⏱", "💰", "🚭", "❤️"]
     private static let labels = ["Время", "Сэкономлено", "Сигарет", "Здоровье"]
+    private var slideIndex: Int { currentSlideIndex() }
+    private var bgStyle: String { currentBgStyle() }
 
     // Настраиваем цвета в зависимости от темы
     private var textColor: Color {
-        switch entry.bgStyle {
+        switch bgStyle {
         case "light": return .black
         case "glass": return .primary // Адаптируется под системную тему под стеклом
         default: return .white // "dark"
@@ -100,7 +153,7 @@ struct DontSmokeWidgetView: View {
     }
 
     private var secondaryColor: Color {
-        switch entry.bgStyle {
+        switch bgStyle {
         case "light": return Color.black.opacity(0.55)
         case "glass": return .secondary // Адаптируется под системную тему
         default: return Color.white.opacity(0.7)
@@ -108,7 +161,7 @@ struct DontSmokeWidgetView: View {
     }
 
     private var bgIconName: String {
-        switch entry.bgStyle {
+        switch bgStyle {
         case "light": return "sun.max.fill"
         case "glass": return "sparkles" // Иконка для стеклянного режима
         default: return "moon.fill"
@@ -117,7 +170,7 @@ struct DontSmokeWidgetView: View {
 
     var body: some View {
         let (value, label) = calcStat()
-        let icon = Self.icons[entry.slideIndex]
+        let icon = Self.icons[slideIndex]
 
         VStack(spacing: 0) {
             // Верхняя строка: иконка темы справа
@@ -138,15 +191,7 @@ struct DontSmokeWidgetView: View {
 
             Spacer()
 
-            // Центральный контент — тап для следующего слайда
-            if #available(iOS 17.0, *) {
-                Button(intent: NextSlideIntent()) {
-                    slideContent(icon: icon, value: value, label: label)
-                }
-                .buttonStyle(.plain)
-            } else {
-                slideContent(icon: icon, value: value, label: label)
-            }
+            slideCarouselContent(icon: icon, value: value, label: label)
 
             Spacer()
 
@@ -154,12 +199,36 @@ struct DontSmokeWidgetView: View {
             HStack(spacing: 5) {
                 ForEach(0..<4, id: \.self) { i in
                     Capsule()
-                        .fill(i == entry.slideIndex ? textColor : secondaryColor.opacity(0.5))
-                        .frame(width: i == entry.slideIndex ? 14 : 5, height: 4)
-                        .animation(.easeInOut(duration: 0.2), value: entry.slideIndex)
+                        .fill(i == slideIndex ? textColor : secondaryColor.opacity(0.5))
+                        .frame(width: i == slideIndex ? 14 : 5, height: 4)
+                        .animation(.easeInOut(duration: 0.2), value: slideIndex)
                 }
             }
             .padding(.bottom, 10)
+        }
+    }
+
+    @ViewBuilder
+    private func slideCarouselContent(icon: String, value: String, label: String) -> some View {
+        if #available(iOS 17.0, *) {
+            ZStack {
+                slideContent(icon: icon, value: value, label: label)
+
+                HStack(spacing: 0) {
+                    Button(intent: PreviousSlideIntent()) {
+                        Color.clear
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(intent: NextSlideIntent()) {
+                        Color.clear
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        } else {
+            slideContent(icon: icon, value: value, label: label)
         }
     }
 
@@ -183,11 +252,11 @@ struct DontSmokeWidgetView: View {
     }
 
     private func calcStat() -> (String, String) {
-        let label = Self.labels[entry.slideIndex]
+        let label = Self.labels[slideIndex]
         guard entry.quitDateMillis > 0 else { return ("—", label) }
 
         let quitDate = Date(timeIntervalSince1970: Double(entry.quitDateMillis) / 1000.0)
-        let diffSeconds = Date().timeIntervalSince(quitDate)
+        let diffSeconds = entry.date.timeIntervalSince(quitDate)
         guard diffSeconds >= 0 else { return ("—", label) }
 
         let minutes = Int64(diffSeconds / 60)
@@ -196,7 +265,7 @@ struct DontSmokeWidgetView: View {
         
         let fractionalDays = diffSeconds / 86400.0
 
-        switch entry.slideIndex {
+        switch slideIndex {
         case 0:
             let v: String
             if minutes < 60       { v = "\(minutes)м" }
@@ -208,11 +277,13 @@ struct DontSmokeWidgetView: View {
             let cpp = Double(entry.costPerPack)
             let cpd = Double(entry.cigarettesPerDay)
             let cpack = Double(max(entry.cigarettesPerPack, 1))
-            let saved = fractionalDays * cpd * cpp / cpack
+            let cigarettesSaved = fractionalDays * cpd
+            let packsSaved = cigarettesSaved / cpack
+            let saved = packsSaved * cpp
             return ("\(Int64(saved))", label)
         case 2:
-            let avoided = Int64(fractionalDays * Double(entry.cigarettesPerDay))
-            return ("\(avoided)", label)
+            let avoided = fractionalDays * Double(entry.cigarettesPerDay)
+            return ("\(Int64(avoided.rounded()))", label)
         default:
             // Health: 11 minutes per cigarette avoided
             let addedMins = fractionalDays * Double(entry.cigarettesPerDay) * 11
@@ -229,19 +300,18 @@ struct DontSmokeWidgetView: View {
 
 @main
 struct DontSmokeWidgetMain: Widget {
-    let kind = "DontSmokeWidget"
+    let kind = widgetKind
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: DontSmokeProvider()) { entry in
             if #available(iOSApplicationExtension 17.0, *) {
                 DontSmokeWidgetView(entry: entry)
-                    .invalidatableContent()
                     .containerBackground(for: .widget) {
-                        widgetBackground(for: entry.bgStyle)
+                        widgetBackground(for: currentBgStyle())
                     }
             } else {
                 DontSmokeWidgetView(entry: entry)
-                    .background(widgetBackground(for: entry.bgStyle))
+                    .background(widgetBackground(for: currentBgStyle()))
             }
         }
         .configurationDisplayName("Не курю")

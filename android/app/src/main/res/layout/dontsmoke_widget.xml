@@ -88,4 +88,24 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/widget_slide_tap_zones"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/widget_prev_slide_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:id="@+id/widget_next_slide_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
 </RelativeLayout>

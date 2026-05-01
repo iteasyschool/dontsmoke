@@ -32,7 +32,7 @@ android {
     }
 
     val keystoreProperties = Properties().apply {
-        val keystorePropertiesFile = rootProject.file("../key.properties")
+        val keystorePropertiesFile = rootProject.file("key.properties")
         if (keystorePropertiesFile.exists()) {
             load(FileInputStream(keystorePropertiesFile))
         }
@@ -41,7 +41,7 @@ android {
     signingConfigs {
         create("release") {
             val storeFilePath = keystoreProperties["storeFile"] as String?
-            storeFile = if (storeFilePath != null) file("../../" + storeFilePath.removePrefix("../")) else null
+            storeFile = if (storeFilePath != null) rootProject.file("app/$storeFilePath") else null
             storePassword = keystoreProperties["storePassword"] as String?
             keyAlias = keystoreProperties["keyAlias"] as String?
             keyPassword = keystoreProperties["keyPassword"] as String?

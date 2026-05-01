@@ -4,10 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
 
 /// Writes profile data so the native home-screen widget can read it.
-/// Android: SharedPreferences ("FlutterSharedPreferences" with "flutter." prefix).
+/// Android: SharedPreferences ("FlutterSharedPreferences" with "flutter." prefix)
+/// + MethodChannel refresh/scheduler kick.
 /// iOS: App Group UserDefaults via MethodChannel + WidgetKit reload.
 class WidgetUpdateService {
-  static const _iosChannel = MethodChannel('com.dontsmoke.kz/widget');
+  static const _widgetChannel = MethodChannel('com.dontsmoke.kz/widget');
 
   static Future<void> saveProfileForWidget(UserProfile profile) async {
     try {
@@ -21,9 +22,9 @@ class WidgetUpdateService {
       await prefs.setInt('cost_per_pack', profile.costPerPack);
       await prefs.setInt('cigarettes_per_pack', profile.cigarettesPerPack);
 
-      // iOS — write to App Group UserDefaults & reload WidgetKit
-      if (Platform.isIOS) {
-        await _iosChannel.invokeMethod('saveWidgetData', {
+      // Native widgets need an explicit refresh after the shared data changes.
+      if (Platform.isAndroid || Platform.isIOS) {
+        await _widgetChannel.invokeMethod('saveWidgetData', {
           'quit_date_millis': profile.quitDate.millisecondsSinceEpoch,
           'cigarettes_per_day': profile.cigarettesPerDay,
           'cost_per_pack': profile.costPerPack,
@@ -43,8 +44,8 @@ class WidgetUpdateService {
       await prefs.remove('cost_per_pack');
       await prefs.remove('cigarettes_per_pack');
 
-      if (Platform.isIOS) {
-        await _iosChannel.invokeMethod('clearWidgetData');
+      if (Platform.isAndroid || Platform.isIOS) {
+        await _widgetChannel.invokeMethod('clearWidgetData');
       }
     } catch (_) {}
   }
