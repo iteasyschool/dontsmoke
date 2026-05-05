@@ -10,7 +10,7 @@ private let timelineHorizonMinutes = 120
 
 // MARK: - App Intents (iOS 17+)
 
-@available(iOS 16.0, *)
+@available(iOS 17.0, *)
 struct PreviousSlideIntent: AppIntent {
     static var title: LocalizedStringResource = "Previous Slide"
 
@@ -23,7 +23,7 @@ struct PreviousSlideIntent: AppIntent {
     }
 }
 
-@available(iOS 16.0, *)
+@available(iOS 17.0, *)
 struct NextSlideIntent: AppIntent {
     static var title: LocalizedStringResource = "Next Slide"
 
@@ -36,7 +36,7 @@ struct NextSlideIntent: AppIntent {
     }
 }
 
-@available(iOS 16.0, *)
+@available(iOS 17.0, *)
 struct CycleBgIntent: AppIntent {
     static var title: LocalizedStringResource = "Change Background"
 
@@ -140,7 +140,12 @@ struct DontSmokeWidgetView: View {
 
     private static let icons  = ["⏱", "💰", "🚭", "❤️"]
     private static let labels = ["Время", "Сэкономлено", "Сигарет", "Здоровье"]
-    private var slideIndex: Int { currentSlideIndex() }
+    private var slideIndex: Int {
+        if #available(iOSApplicationExtension 17.0, *) {
+            return currentSlideIndex()
+        }
+        return 0
+    }
     private var bgStyle: String { currentBgStyle() }
 
     // Настраиваем цвета в зависимости от темы
@@ -184,6 +189,7 @@ struct DontSmokeWidgetView: View {
                             .frame(width: 22, height: 22)
                     }
                     .buttonStyle(.plain)
+                    .contentShape(Rectangle())
                 }
             }
             .padding(.horizontal, 10)
@@ -195,16 +201,21 @@ struct DontSmokeWidgetView: View {
 
             Spacer()
 
-            // Индикаторы слайдов
-            HStack(spacing: 5) {
-                ForEach(0..<4, id: \.self) { i in
-                    Capsule()
-                        .fill(i == slideIndex ? textColor : secondaryColor.opacity(0.5))
-                        .frame(width: i == slideIndex ? 14 : 5, height: 4)
-                        .animation(.easeInOut(duration: 0.2), value: slideIndex)
+            if #available(iOSApplicationExtension 17.0, *) {
+                // Индикаторы слайдов
+                HStack(spacing: 5) {
+                    ForEach(0..<4, id: \.self) { i in
+                        Capsule()
+                            .fill(i == slideIndex ? textColor : secondaryColor.opacity(0.5))
+                            .frame(width: i == slideIndex ? 14 : 5, height: 4)
+                            .animation(.easeInOut(duration: 0.2), value: slideIndex)
+                    }
                 }
+                .padding(.bottom, 10)
+            } else {
+                Spacer()
+                    .frame(height: 10)
             }
-            .padding(.bottom, 10)
         }
     }
 
@@ -216,17 +227,23 @@ struct DontSmokeWidgetView: View {
 
                 HStack(spacing: 0) {
                     Button(intent: PreviousSlideIntent()) {
-                        Color.clear
+                        Rectangle()
+                            .fill(Color.white.opacity(0.001))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                     .buttonStyle(.plain)
+                    .contentShape(Rectangle())
 
                     Button(intent: NextSlideIntent()) {
-                        Color.clear
+                        Rectangle()
+                            .fill(Color.white.opacity(0.001))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                     .buttonStyle(.plain)
+                    .contentShape(Rectangle())
                 }
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             slideContent(icon: icon, value: value, label: label)
         }
