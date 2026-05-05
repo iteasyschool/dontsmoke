@@ -6,6 +6,27 @@
     android:background="@android:color/transparent"
     android:padding="0dp">
 
+    <!-- Tap zones stay below content so the theme button can receive clicks. -->
+    <LinearLayout
+        android:id="@+id/widget_slide_tap_zones"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/widget_prev_slide_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:id="@+id/widget_next_slide_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
     <!-- Главная область — нажатие для смены слайда -->
     <LinearLayout
         android:id="@+id/widget_main_area"
@@ -85,26 +106,6 @@
                 android:textSize="13dp" />
 
         </RelativeLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/widget_slide_tap_zones"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <FrameLayout
-            android:id="@+id/widget_prev_slide_area"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
-        <FrameLayout
-            android:id="@+id/widget_next_slide_area"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
 
     </LinearLayout>
 
